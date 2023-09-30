@@ -1,37 +1,32 @@
-import entity.Item;
-import entity.Person;
+import entity.Actor;
+import entity.Movie;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-
 public class App {
     public static void main(String[] args) {
-        Configuration configuration = new Configuration().addAnnotatedClass(Person.class).addAnnotatedClass(Item.class);
+        Configuration configuration = new Configuration().addAnnotatedClass(Actor.class).addAnnotatedClass(Movie.class);
 
         SessionFactory sessionFactory = configuration.buildSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
 
-        try {
+        try (sessionFactory) {
+            Session session = sessionFactory.getCurrentSession();
             session.beginTransaction();
 
-            Person person = session.get(Person.class, 4);
-            Item item = session.get(Item.class, 1);
-            item.getOwner().getItems().remove(item);
+            Actor actor = session.get(Actor.class, 2);
+            System.out.println(actor.getMovies());
 
-            item.setOwner(person);
-            person.getItems().add(item);
+            Movie movieToRemove = actor.getMovies().get(0);
 
+            actor.getMovies().remove(0);
+            movieToRemove.getActors().remove(actor);
 
 
             session.getTransaction().commit();
 
-        } finally {
-            sessionFactory.close();
         }
     }
 }
